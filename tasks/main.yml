@@ -1,0 +1,50 @@
+---
+- name: Add node_exporter user
+  user:
+    name: node_exporter
+    shell: /bin/false
+    create_home: no
+  become: yes
+
+- name: Set up prometheus directory
+  file:
+    state: directory
+    path: /opt/local/prometheus
+    owner: node_exporter
+    group: node_exporter
+    mode: 0755
+  become: yes
+
+- name: copy prometheus from files dir to remote host
+  copy:
+    src: files/{{ node_exporter_version }}/node_exporter
+    dest: /opt/local/prometheus/node_exporter
+    owner: node_exporter
+    group: node_exporter
+    mode: 0755
+  become: yes
+
+- name: link node_exporter to /usr/local/bin/node_exporter
+  file:
+    state: link
+    src: /opt/local/prometheus/node_exporter
+    dest: /usr/local/bin/node_exporter
+    owner: node_exporter
+    group: node_exporter
+  become: yes
+
+- name: create node_exporter service
+  copy:
+    src: files/node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+
+- name: start node_exporter service
+  systemd: 
+    name: node_exporter
+    state: started
+    daemon_reload: yes
+  become: yes
