@@ -15,10 +15,28 @@
     mode: 0755
   become: yes
 
+- name: Set up text collector directory
+  file:
+    state: directory
+    path: /var/prometheus/text_collector
+    owner: node_exporter
+    group: node_exporter
+    mode: 0755
+  become: yes
+
 - name: copy prometheus from files dir to remote host
   copy:
     src: files/{{ node_exporter_version }}/node_exporter
     dest: /opt/local/prometheus/node_exporter
+    owner: node_exporter
+    group: node_exporter
+    mode: 0755
+  become: yes
+  
+- name: copy reboot report script
+  copy:
+    src: files/reboot-report.sh
+    dest: /opt/local/prometheus/reboot-report.sh
     owner: node_exporter
     group: node_exporter
     mode: 0755
@@ -40,6 +58,15 @@
     owner: root
     group: root
     mode: 0644
+  become: yes
+
+- name: setup reboot report cron job
+  cron:
+    name: reboot report for text collector
+    minute: 5
+    user: root
+    job: "/bin/bash /opt/local/prometheus/reboot-report.sh"
+    cron_file: reboot_reporter
   become: yes
 
 - name: start node_exporter service
