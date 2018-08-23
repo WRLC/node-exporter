@@ -72,6 +72,6 @@
 - name: start node_exporter service
   systemd: 
     name: node_exporter
-    state: started
+    state: restarted
     daemon_reload: yes
   become: yes
