@@ -64,7 +64,7 @@
   cron:
     name: reboot report for text collector
     minute: 5
-    user: root
+    user: node_exporter
     job: "/bin/bash /opt/local/prometheus/reboot-report.sh"
     cron_file: reboot_reporter
   become: yes
@@ -72,6 +72,8 @@
 - name: start node_exporter service
   systemd: 
     name: node_exporter
-    state: restarted
+    enabled: yes
+    masked: no
+    state: started
     daemon_reload: yes
   become: yes
